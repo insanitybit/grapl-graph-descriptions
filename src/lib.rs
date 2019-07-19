@@ -1,7 +1,6 @@
 extern crate base64;
 #[macro_use]
 extern crate derive_builder;
-extern crate hash_hasher;
 #[macro_use]
 extern crate log;
 #[macro_use]
@@ -14,14 +13,14 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
-extern crate sha3;
 extern crate uuid;
+
+use serde_json::Value;
+use uuid::Uuid;
 
 use graph_description::*;
 use graph_description::host::HostId;
 use graph_description::node_description::*;
-use serde_json::Value;
-use uuid::Uuid;
 
 pub mod graph_description {
     include!(concat!(env!("OUT_DIR"), "/graph_description.rs"));
@@ -76,7 +75,7 @@ impl OutboundConnection {
         };
 
         match state {
-            ConnectionState::Created => ic.created_timestamp= timestamp,
+            ConnectionState::Created => ic.created_timestamp = timestamp,
             ConnectionState::Terminated => ic.terminated_timestamp = timestamp,
             ConnectionState::Existing => ic.last_seen_timestamp = timestamp,
         }
@@ -97,7 +96,7 @@ impl OutboundConnection {
             "direction": "outbound",
         });
 
-        if self.created_timestamp!= 0 {
+        if self.created_timestamp != 0 {
             j["created_time"] = self.created_timestamp.into()
         }
 
@@ -126,7 +125,7 @@ impl OutboundConnection {
     pub fn merge(&mut self, other: &Self) {
         if self.node_key != other.node_key {
             warn!("Attempted to merge two nodes with different keys. Dropping merge.");
-            return
+            return;
         }
 
         if self.created_timestamp == 0 {
@@ -172,7 +171,7 @@ impl InboundConnection {
         };
 
         match state {
-            ConnectionState::Created => ic.created_timestamp= timestamp,
+            ConnectionState::Created => ic.created_timestamp = timestamp,
             ConnectionState::Terminated => ic.terminated_timestamp = timestamp,
             ConnectionState::Existing => ic.last_seen_timestamp = timestamp,
         }
@@ -197,7 +196,7 @@ impl InboundConnection {
             "direction": "inbound",
         });
 
-        if self.created_timestamp!= 0 {
+        if self.created_timestamp != 0 {
             j["created_time"] = self.created_timestamp.into()
         }
 
@@ -226,7 +225,7 @@ impl InboundConnection {
     pub fn merge(&mut self, other: &Self) {
         if self.node_key != other.node_key {
             warn!("Attempted to merge two nodes with different keys. Dropping merge.");
-            return
+            return;
         }
 
         if self.created_timestamp == 0 {
@@ -308,7 +307,7 @@ impl From<HostIdentifier> for Host {
                         HostId::Hostname(hostname)
                     )
                 }
-            },
+            }
             HostIdentifier::IpAddress(hostname) => {
                 Host {
                     host_id: Some(
@@ -335,7 +334,6 @@ impl HostIdentifier {
         }
     }
 }
-
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -555,26 +553,24 @@ impl NodeDescription {
 
     pub fn merge(&mut self, other: &Self) {
         match (self.which_node.as_mut().unwrap(), other.which_node.as_ref().unwrap()) {
-            (WhichNode::ProcessNode(node),              WhichNode::ProcessNode(other)) => node.merge(other),
-            (WhichNode::FileNode(node),                 WhichNode::FileNode(other)) => node.merge(other),
-            (WhichNode::IpAddressNode(node),            WhichNode::IpAddressNode(other)) => node.merge(other),
-            (WhichNode::OutboundConnectionNode(node),   WhichNode::OutboundConnectionNode(other)) => node.merge(other),
-            (WhichNode::InboundConnectionNode(node),    WhichNode::InboundConnectionNode(other)) => node.merge(other),
-            (WhichNode::DynamicNode(node),    WhichNode::DynamicNode(other)) => node.merge(other.clone()),
+            (WhichNode::ProcessNode(node), WhichNode::ProcessNode(other)) => node.merge(other),
+            (WhichNode::FileNode(node), WhichNode::FileNode(other)) => node.merge(other),
+            (WhichNode::IpAddressNode(node), WhichNode::IpAddressNode(other)) => node.merge(other),
+            (WhichNode::OutboundConnectionNode(node), WhichNode::OutboundConnectionNode(other)) => node.merge(other),
+            (WhichNode::InboundConnectionNode(node), WhichNode::InboundConnectionNode(other)) => node.merge(other),
+            (WhichNode::DynamicNode(node), WhichNode::DynamicNode(other)) => node.merge(other.clone()),
 
             _ => warn!("Attempted to merge two nodes of different type"),
         }
     }
-
 }
-
 
 
 impl DynamicNode {
     pub fn set_property(
         &mut self,
         name: impl Into<String>,
-        value: impl Into<NodeProperty>
+        value: impl Into<NodeProperty>,
     ) {
         self.properties.insert(
             name.into(),
@@ -637,12 +633,12 @@ impl DynamicNode {
             match strategy.strategy.as_ref().unwrap() {
                 id_strategy::Strategy::Session(ref strategy) => {
                     if strategy.primary_key_requires_asset_id {
-                        return true
+                        return true;
                     }
                 }
                 id_strategy::Strategy::Static(ref strategy) => {
                     if strategy.primary_key_requires_asset_id {
-                        return true
+                        return true;
                     }
                 }
             }
@@ -650,7 +646,6 @@ impl DynamicNode {
 
         false
     }
-
 }
 
 impl From<Static> for IdStrategy {
@@ -709,7 +704,7 @@ impl std::string::ToString for NodeProperty {
 pub enum ProcessState {
     Created,
     Terminated,
-    Existing
+    Existing,
 }
 
 impl From<ProcessState> for u32 {
@@ -719,7 +714,6 @@ impl From<ProcessState> for u32 {
             ProcessState::Terminated => 2,
             ProcessState::Existing => 3,
         }
-
     }
 }
 
@@ -749,7 +743,7 @@ impl From<u32> for ConnectionState {
 pub enum FileState {
     Created,
     Deleted,
-    Existing
+    Existing,
 }
 
 impl From<u32> for FileState {
@@ -770,12 +764,10 @@ impl From<FileState> for u32 {
             FileState::Deleted => 2,
             FileState::Existing => 3,
         }
-
     }
 }
 
 impl AssetDescription {
-
     pub fn get_key(&self) -> &str {
         &self.node_key
     }
@@ -797,7 +789,7 @@ impl AssetDescription {
     }
 
     pub fn into_json(self) -> Value {
-            json!({
+        json!({
             "node_key": self.node_key,
             "asset_id": self.node_key,
             "host_name": self.host_name,
@@ -898,7 +890,7 @@ impl ProcessDescription {
     pub fn merge(&mut self, other: &Self) {
         if self.node_key != other.node_key {
             warn!("Attempted to merge two process nodes with different keys. Dropping merge.");
-            return
+            return;
         }
 
         if self.created_timestamp == 0 {
@@ -914,7 +906,6 @@ impl ProcessDescription {
         if self.process_name.is_empty() && !other.process_name.is_empty() {
             self.process_name = other.process_name.clone();
         }
-
     }
 
     pub fn timestamp(&self) -> u64 {
@@ -999,7 +990,7 @@ impl FileDescription {
         };
 
         match state {
-            FileState::Created => fd.created_timestamp= timestamp,
+            FileState::Created => fd.created_timestamp = timestamp,
             FileState::Existing => fd.last_seen_timestamp = timestamp,
             FileState::Deleted => fd.deleted_timestamp = timestamp,
         }
@@ -1038,7 +1029,7 @@ impl FileDescription {
             j["file_path"] = Value::from(self.file_path.to_owned());
         }
 
-        if self.created_timestamp!= 0 {
+        if self.created_timestamp != 0 {
             j["created_time"] = self.created_timestamp.into()
         }
 
@@ -1055,7 +1046,7 @@ impl FileDescription {
     pub fn merge(&mut self, other: &Self) {
         if self.node_key != other.node_key {
             warn!("Attempted to merge two process nodes with different keys. Dropping merge.");
-            return
+            return;
         }
 
         if self.created_timestamp == 0 {
@@ -1127,8 +1118,6 @@ impl IpAddressDescription {
     pub fn merge(&mut self, _other: &Self) {
         // nop
     }
-
-
 }
 
 impl GraphDescription {
@@ -1136,7 +1125,7 @@ impl GraphDescription {
         GraphDescription {
             nodes: hashmap![],
             edges: hashmap![],
-            timestamp
+            timestamp,
         }
     }
 
@@ -1191,7 +1180,7 @@ impl GraphDescription {
         let edge = EdgeDescription {
             from: from.clone(),
             to: to,
-            edge_name
+            edge_name,
         };
 
         self.edges
