@@ -26,9 +26,8 @@ maplit = "1.0.1"
 
 
 [dependencies.uuid]
-version = "*"
+version = "0.7.4"
 features = ["v4"]
-
 
 
 [build-dependencies]
