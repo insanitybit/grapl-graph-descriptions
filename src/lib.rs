@@ -671,6 +671,22 @@ impl From<Session> for IdStrategy {
     }
 }
 
+impl From<Vec<String>> for NodeProperty {
+    fn from(s: Vec<String>) -> NodeProperty {
+        NodeProperty {
+            property: Some(node_property::Property::RepeatedStrProp(s))
+        }
+    }
+}
+
+impl From<Vec<u64>> for NodeProperty {
+    fn from(s: Vec<u64>) -> NodeProperty {
+        NodeProperty {
+            property: Some(node_property::Property::RepeatedIntProp(s))
+        }
+    }
+}
+
 impl From<String> for NodeProperty {
     fn from(s: String) -> NodeProperty {
         NodeProperty {
