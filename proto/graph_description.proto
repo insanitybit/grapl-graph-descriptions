@@ -145,11 +145,21 @@ message IdStrategy {
     }
 }
 
+message RepeatedNodeStrProperty {
+    repeated string repeated_str = 1;
+}
+
+message RepeatedNodeIntProperty {
+    repeated string repeated_int = 1;
+}
+
 message NodeProperty {
     oneof property {
         int64 intprop = 1;
         uint64 uintprop = 2;
         string strprop = 3;
+        RepeatedNodeStrProperty repeated_str_prop = 4;
+        RepeatedNodeIntProperty repeated_int_prop = 5;
     }
 }
 

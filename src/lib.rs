@@ -614,6 +614,13 @@ impl DynamicNode {
                 Some(node_property::Property::Intprop(i)) => Value::from(i),
                 Some(node_property::Property::Uintprop(i)) => Value::from(i),
                 Some(node_property::Property::Strprop(s)) => Value::from(s),
+
+                Some(node_property::Property::RepeatedStrProp(s)) => {
+                    Value::from(s.repeated_str)
+                },
+                Some(node_property::Property::RepeatedIntProp(s)) => {
+                    Value::from(s.repeated_int)
+                },
                 None => panic!("Invalid property on DynamicNode: {}", self.node_key),
             };
 
@@ -685,18 +692,6 @@ impl From<u64> for NodeProperty {
         NodeProperty {
             property: Some(node_property::Property::Uintprop(i))
         }
-    }
-}
-
-impl std::string::ToString for NodeProperty {
-    fn to_string(&self) -> String {
-        let prop = match &self.property {
-            Some(node_property::Property::Intprop(i)) => i.to_string(),
-            Some(node_property::Property::Uintprop(i)) => i.to_string(),
-            Some(node_property::Property::Strprop(s)) => s.to_string(),
-            None => panic!("Invalid property : {:?}", self),
-        };
-        prop
     }
 }
 
