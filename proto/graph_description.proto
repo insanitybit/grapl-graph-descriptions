@@ -150,7 +150,7 @@ message RepeatedNodeStrProperty {
 }
 
 message RepeatedNodeIntProperty {
-    repeated string repeated_int = 1;
+    repeated uint64 repeated_int = 1;
 }
 
 message NodeProperty {
